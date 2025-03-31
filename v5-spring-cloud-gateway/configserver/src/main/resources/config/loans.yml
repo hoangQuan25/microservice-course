@@ -1,0 +1,11 @@
+build:
+  version: "1.3"
+
+accounts:
+  message: "Welcome to my banking system for loan service"
+  contactDetails:
+    name: "Hoang Quan - Dev"
+    email: "quanabc@gmail.com"
+  onCallSupport:
+    - (84) 368 299 999
+    - (84) 368 499 999

@@ -1,0 +1,16 @@
+spring:
+  config:
+    activate:
+      on-profile: "qa"
+
+build:
+  version: "1.2"
+
+accounts:
+  message: "Welcome to HQ banking system related QA APIs"
+  contactDetails:
+    name: "Hoang Quan - Product owner"
+    email: "quanabc@gmail.com"
+  onCallSupport:
+    - (84) 368 299 999
+    - (84) 368 499 999

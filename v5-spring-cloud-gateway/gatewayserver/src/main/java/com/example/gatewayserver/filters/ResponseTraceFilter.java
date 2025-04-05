@@ -5,20 +5,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-@Component
+@Configuration
 public class ResponseTraceFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(ResponseTraceFilter.class);
-    private final FilterUtility filterUtility;
 
     @Autowired
-    public ResponseTraceFilter(FilterUtility filterUtility) {
-        this.filterUtility = filterUtility;
-    }
+    FilterUtility filterUtility;
 
     @Bean
     public GlobalFilter postGlobalFilter() {
@@ -27,7 +25,7 @@ public class ResponseTraceFilter {
                 HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
                 String correlationId = filterUtility.getCorrelationId(requestHeaders);
                 logger.debug("Updated the correlation id to the outbound headers: {}", correlationId);
-                exchange.getResponse().getHeaders().add(FilterUtility.CORRELATION_ID, correlationId);
+                exchange.getResponse().getHeaders().add(filterUtility.CORRELATION_ID, correlationId);
             }));
         };
     }

@@ -16,6 +16,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -41,6 +43,7 @@ public class LoansController {
     private final LoansService loansService;
     private final Environment environment;
     private final LoansContactInfoDto loansContactInfoDto;
+    private static final Logger logger = LoggerFactory.getLogger(LoansController.class);
 
     @Value("${build.version}")
     private String buildVersion;
@@ -93,10 +96,11 @@ public class LoansController {
     }
     )
     @GetMapping("/fetch")
-    public ResponseEntity<LoansDto> fetchLoanDetails(@RequestParam
-                                                     @Pattern(regexp="(^$|[0-9]{10})",
-                                                             message = "Mobile number must be 10 digits")
-                                                     String mobileNumber) {
+    public ResponseEntity<LoansDto> fetchLoanDetails(
+            @RequestHeader("mybank-correlation-id") String correlationId,
+            @RequestParam @Pattern(regexp="(^$|[0-9]{10})",
+                    message = "Mobile number must be 10 digits") String mobileNumber) {
+        logger.debug("MyBank correlation id found: {}", correlationId);
         LoansDto loansDto = loansService.fetchLoan(mobileNumber);
         return ResponseEntity.status(HttpStatus.OK).body(loansDto);
     }

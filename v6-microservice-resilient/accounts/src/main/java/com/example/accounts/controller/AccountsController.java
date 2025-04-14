@@ -6,6 +6,8 @@ import com.example.accounts.dto.CustomerDto;
 import com.example.accounts.dto.ErrorResponseDto;
 import com.example.accounts.dto.ResponseDto;
 import com.example.accounts.service.AccountsService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -26,6 +30,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.util.concurrent.TimeoutException;
+
 
 @RestController
 @RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -34,6 +40,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Accounts API", description = "API for performing CRUD on customer accounts")
 public class AccountsController {
 
+    public static final Logger logger = LoggerFactory.getLogger(AccountsController.class);
     private final AccountsService accountsService;
     private final Environment environment;
     private final AccountsContactInfoDto accountsContactInfoDto;
@@ -142,9 +149,16 @@ public class AccountsController {
         }
     }
 
+    @Retry(name = "getBuildVersion", fallbackMethod = "getBuildVersionFallback")
     @GetMapping("/build-info")
     public ResponseEntity<String> getBuildVersion() {
+        logger.debug("getBuildVersion() invoked");
         return ResponseEntity.status(HttpStatus.OK).body(buildVersion);
+    }
+
+    public ResponseEntity<String> getBuildVersionFallback(Throwable throwable) {
+        logger.debug("getBuildVersionFallback() invoked");
+        return ResponseEntity.status(HttpStatus.OK).body("0.9.0");
     }
 
     @GetMapping("/java-version")
@@ -152,9 +166,15 @@ public class AccountsController {
         return ResponseEntity.status(HttpStatus.OK).body(environment.getProperty("MAVEN_HOME"));
     }
 
+    @RateLimiter(name = "getContactInfo", fallbackMethod = "getContactInfoFallback")
     @GetMapping("/contact-info")
     public ResponseEntity<AccountsContactInfoDto> getContactInfo() {
         return ResponseEntity.status(HttpStatus.OK).body(accountsContactInfoDto);
+    }
+
+    public ResponseEntity<String> getContactInfoFallback(Throwable throwable) {
+        logger.debug("getContactInfoFallback() invoked");
+        return ResponseEntity.status(HttpStatus.OK).body("Hoang Quan");
     }
 
 }

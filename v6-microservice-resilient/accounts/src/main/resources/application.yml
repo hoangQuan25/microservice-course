@@ -21,6 +21,10 @@ spring:
     show-sql: true
   config:
     import: "optional:configserver:http://localhost:8071/"
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
 
 management:
   endpoints:
@@ -56,6 +60,33 @@ logging:
     com:
       example:
         accounts: DEBUG
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 2
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1000
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        ignore-exceptions:
+          - java.lang.NullPointerException
+        retry-exceptions:
+          - java.util.concurrent.TimeoutException
+  ratelimiter:
+    configs:
+      default:
+        timeoutDuration: 1000
+        limitRefreshPeriod: 5000
+        limitForPeriod: 1
+
 
 info:
   app:

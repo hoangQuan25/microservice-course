@@ -69,7 +69,7 @@
 				<version>3.4.4</version>
 				<configuration>
 					<to>
-						<image>hoangquan25/${project.artifactId}:1.4</image>
+						<image>hoangquan25/${project.artifactId}:1.5</image>
 					</to>
 				</configuration>
 			</plugin>
